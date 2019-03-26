@@ -1,0 +1,15 @@
+{
+  "name": "mp-req",
+  "version": "1.0.0",
+  "description": "基于wx.request的高级封装。",
+  "main": "index.js",
+  "repository": "git@github.com:jack-Lo/mp-req.git",
+  "author": "jack-Lo <jack-lo@foxmail.com>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
+  }
+}
