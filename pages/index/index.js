@@ -2,11 +2,11 @@ const req = require('../../req/index.js');
 
 Page({
   onLoad() {
-    this.getWeather();
+    this.getMyInfo();
   },
 
-  getWeather() {
-    req.common.getWeather()
+  getMyInfo() {
+    req.user.getMyInfo()
       .then((res) => {
         console.log(res);
       })

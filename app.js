@@ -1,6 +1,6 @@
 const req = require('./req/index.js');
-const commonApi = require('./req/api/common.js');
+const userApi = require('./api/user.js');
 
-req.use(commonApi);
+req.use(userApi);
 
 App({});

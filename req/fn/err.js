@@ -25,8 +25,6 @@ function show(err) {
 
   wx.showModal({
     showCancel: false,
-    cancelColor: '#212732',
-    confirmColor: '#377fee',
     content: msg,
   });
 }

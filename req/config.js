@@ -1,4 +1,4 @@
-const apiUrl = '/';
+const apiUrl = 'http://localhost:3000';
 
 /**
  * code换取sessionId
@@ -7,14 +7,14 @@ const apiUrl = '/';
 function code2sessionId(code) {
   return new Promise((res, rej) => {
     wx.request({
-      url: `${apiUrl}/api/login`,
+      url: `${apiUrl}/api/sys/login`,
       method: 'POST',
       data: {
         code,
       },
       success(r1) {
-        if (r1.code === 0) {
-          res(r1.data.sessionId);
+        if (r1.data && r1.data.code === 0) {
+          res(r1.data.data.sessionId);
         } else {
           rej(r1);
         }
@@ -32,7 +32,7 @@ function isSessionAvailable(res) {
   return res.code !== 3000;
 }
 
-module.export = {
+module.exports = {
   apiUrl,
   code2sessionId,
   isSessionAvailable,
