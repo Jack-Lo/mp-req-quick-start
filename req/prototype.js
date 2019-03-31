@@ -1,12 +1,28 @@
-const {
-  code2sessionId, isSessionAvailable,
-} = require('./config.js');
-
 let sessionId = wx.getStorageSync('sessionId');
-let loginQueue = [];
+const loginQueue = [];
 let isLoginning = false;
 
-const R = {};
+const req = {
+  apiUrl: '/',
+  code2sessionId: null,
+  isSessionAvailable: null,
+  init(opt = {}) {
+    const {
+      apiUrl,
+      code2sessionId,
+      isSessionAvailable,
+    } = opt;
+    if (apiUrl) {
+      req.apiUrl = apiUrl;
+    }
+    if (code2sessionId) {
+      req.code2sessionId = code2sessionId;
+    }
+    if (isSessionAvailable) {
+      req.isSessionAvailable = isSessionAvailable;
+    }
+  },
+};
 
 /**
  * 判断请求状态是否成功
@@ -54,21 +70,21 @@ function requestP(options = {}) {
           }
           res(r.data);
         } else {
-          if (fail) {
-            fail({
-              msg: `服务器好像出了点小问题，请与客服联系~（错误代码：${r.statusCode}）`,
-              detail: r,
-            });
-          }
-          rej({
+          const err = {
             msg: `服务器好像出了点小问题，请与客服联系~（错误代码：${r.statusCode}）`,
             detail: r,
-          });
+          };
+          if (fail) {
+            fail(err);
+            return;
+          }
+          rej(err);
         }
       },
       fail(err) {
         if (fail) {
           fail(err);
+          return;
         }
         rej(err);
       },
@@ -87,7 +103,11 @@ function login() {
       success(r1) {
         if (r1.code) {
           // 获取sessionId
-          code2sessionId(r1.code)
+          if (!req.code2sessionId) {
+            rej('code2sessionId未定义');
+            return;
+          }
+          req.code2sessionId(r1.code)
             .then((r2) => {
               const newSessionId = r2;
               sessionId = newSessionId; // 更新sessionId
@@ -98,16 +118,12 @@ function login() {
               });
               res(r2);
             })
-            .catch((err) => {
-              rej(err);
-            });
+            .catch(rej);
         } else {
           rej(r1);
         }
       },
-      fail(err) {
-        rej(err);
-      },
+      fail: rej,
     });
   });
 }
@@ -127,13 +143,15 @@ function getSessionId() {
         login()
           .then((r1) => {
             isLoginning = false;
-            loginQueue.map(q => q.res(r1));
-            loginQueue = [];
+            while (loginQueue.length) {
+              loginQueue.shift().res(r1);
+            }
           })
           .catch((err) => {
             isLoginning = false;
-            loginQueue.map(q => q.rej(err));
-            loginQueue = [];
+            while (loginQueue.length) {
+              loginQueue.shift().rej(err);
+            }
           });
       }
     } else {
@@ -147,7 +165,7 @@ function getSessionId() {
  * @param {object} options {}
  * @param {boolean} keepLogin true
  */
-function req(options = {}, keepLogin = true) {
+function request(options = {}, keepLogin = true) {
   if (keepLogin) {
     return new Promise((res, rej) => {
       getSessionId()
@@ -155,7 +173,11 @@ function req(options = {}, keepLogin = true) {
           // 获取sessionId成功之后，发起请求
           requestP(options)
             .then((r2) => {
-              if (!isSessionAvailable(r2)) {
+              if (!req.isSessionAvailable) {
+                rej('isSessionAvailable未定义');
+                return;
+              }
+              if (!req.isSessionAvailable(r2)) {
                 /**
                  * 登录状态无效，则重新走一遍登录流程
                  * 销毁本地已失效的sessionId
@@ -164,26 +186,17 @@ function req(options = {}, keepLogin = true) {
                 getSessionId()
                   .then(() => {
                     requestP(options)
-                      .then((r4) => {
-                        res(r4);
-                      })
-                      .catch((err) => {
-                        rej(err);
-                      });
-                  });
+                      .then(res)
+                      .catch(rej);
+                  })
+                  .catch(rej);
               } else {
                 res(r2);
               }
             })
-            .catch((err) => {
-              // 请求出错
-              rej(err);
-            });
+            .catch(rej);
         })
-        .catch((err) => {
-          // 获取sessionId失败
-          rej(err);
-        });
+        .catch(rej);
     });
   }
   // 不需要sessionId，直接发起请求
@@ -195,9 +208,9 @@ function req(options = {}, keepLogin = true) {
  * @param {object} plugin
  */
 function use(plugin) {
-  return plugin.install(R, req);
+  return plugin.install(req, request);
 }
 
-R.use = use;
+req.use = use;
 
-module.exports = R;
+module.exports = req;
