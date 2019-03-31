@@ -1,3 +1,6 @@
 <view class="greet">
   Good day.
+  <navigator url="/pages/test/index" style="margin-top: 20rpx;">
+    <button type="primary" size="mini">test</button>
+  </navigator>
 </view>

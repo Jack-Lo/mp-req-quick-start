@@ -14,7 +14,7 @@
 	"compileType": "miniprogram",
 	"libVersion": "2.5.0",
 	"appid": "wxef6bf5efcb99c709",
-	"projectname": "mp-req",
+	"projectname": "mp-req-quick-start",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},

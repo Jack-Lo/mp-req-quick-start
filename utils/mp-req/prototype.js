@@ -3,7 +3,7 @@ const loginQueue = [];
 let isLoginning = false;
 
 const req = {
-  apiUrl: '/',
+  apiUrl: '',
   code2sessionId: null,
   isSessionAvailable: null,
   init(opt = {}) {
