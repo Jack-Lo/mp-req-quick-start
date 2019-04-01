@@ -180,11 +180,12 @@ Page({
 
 这会儿我们再来了解一下req的初始化过程~
 
-`req.init`接受三个参数，分别是：
+`req.init`接受以下参数：
 
 * **apiUrl**：api地址的前缀，例如：`https://api.jack-lo.com/mp-req`；
 * **code2sessionId**：code（来自于wx.login）转化为sessionId的过程函数；
 * **isSessionAvailable**：sessionId是否有效（未过期）的判断函数。
+* **sessionHeaderKey**：默认通过header的方式将sessionId传给后端，此项可以配置sessionId的key值。
 
 先来看code2sessionId，我们首先需要通过`wx.login`获取到code，再通过`wx.request`将code传给后端，最后拿到后端返回的sessionId：
 
@@ -473,6 +474,6 @@ req.user.updateMyInfo()
 
 > 大多数时候我们只停留在自己的业务里，并不需要跟微信打交道，我们可以约定自己的会话有效期，并且放宽一些，比如1天，只要是不需要跟微信打交道，这个时效性就会宽松的多，性能也会得到提高。
 
-req的自动登录就是这么实现的，约定好登录过期状态（默认是`res.code === 3000`，请根据实际情况自行修改），req会自动调用`wx.login`重新获取`js code`，再用`js code`去调用登录接口换取新的`sessionId`，最后再发起一遍上次的请求。
+req的自动登录就是这么实现的，约定好登录过期状态（默认是`res.code === 3000`，请根据实际情况自行修改），req会自动调用`wx.login`重新获取`js code`，再用`js code`去调用登录接口换取新的`sessionId`，最后再发起一遍上次的请求（通过header携带sessionId）。
 
 这让开发者可以更加专注在业务开发上，而不必关心登录过期的问题。
